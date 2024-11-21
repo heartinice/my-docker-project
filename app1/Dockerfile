@@ -1,20 +1,27 @@
-# Используем базовый образ GCC для сборки C++ приложения
+# Используем официальный образ gcc
 FROM gcc:latest
 
-# Обновляем списки пакетов и проверяем, что репозитории доступны
-RUN apt-get update || echo "Ошибка обновления репозиториев"
+# Обновляем репозитории и меняем зеркало на более доступное
+RUN echo "deb http://deb.debian.org/debian/ bookworm main" > /etc/apt/sources.list \
+    && echo "deb http://security.debian.org/debian-security bookworm-security main" >> /etc/apt/sources.list \
+    && echo "deb http://deb.debian.org/debian/ bookworm-updates main" >> /etc/apt/sources.list \
+    && apt-get update && apt-get install -y \
+    cmake \
+    make \
+    g++ \
+    curl \
+    gnupg \
+    lsb-release \
+    && apt-get clean
 
-# Устанавливаем необходимые пакеты
-RUN apt-get install -y cmake make g++
+# Копируем исходный код приложения
+COPY . /app
 
 # Устанавливаем рабочую директорию
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Копируем исходный код и файл сборки
-COPY . .
-
-# Собираем проект с помощью CMake
+# Строим приложение
 RUN cmake . && make
 
-# Устанавливаем точку входа
-CMD ["./app1"]
+# Указываем команду для запуска приложения
+CMD ["./your_application_executable"]
