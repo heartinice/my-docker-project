@@ -1,5 +1,16 @@
-# Используем образ Nginx для второго сервиса
-FROM nginx:latest
+FROM gcc:11
 
-# Копируем файлы для веб-сервиса
-COPY . /usr/share/nginx/html
+# Установить зависимости
+RUN apt-get update && apt-get install -y cmake
+
+# Создать рабочую директорию
+WORKDIR /app
+
+# Скопировать исходные файлы и сборочный файл
+COPY . .
+
+# Сборка проекта
+RUN cmake . && make
+
+# Запуск приложения
+CMD ["./app2"]
