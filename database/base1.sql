@@ -1,3 +1,9 @@
+CREATE DATABASE IF NOT EXISTS example_db;
+
+USE example_db;
+
+-- Добавьте ваши таблицы, данные или другие SQL-команды ниже.
+
 CREATE DATABASE example_db;
 USE example_db;
 CREATE TABLE users (
