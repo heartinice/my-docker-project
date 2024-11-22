@@ -1,3 +1,0 @@
-/Users/macbook14/my-docker-project/app2/cmake-build-debug/CMakeFiles/app2.dir
-/Users/macbook14/my-docker-project/app2/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/macbook14/my-docker-project/app2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
