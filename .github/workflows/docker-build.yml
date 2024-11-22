@@ -13,9 +13,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Установим Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      # Установим Docker Compose
+      - name: Set up Docker Compose
+        uses: docker/setup-docker-compose-action@v1
+
+      # Построим и запустим Docker контейнеры
       - name: Build and test app
         run: |
-          docker-compose up --build
+          docker-compose -f docker-compose.yml up --build -d
+
+      # Опционально, проверим логи контейнеров
+      - name: Check logs
+        run: |
+          docker-compose logs app1_container
+          docker-compose logs database_container
+
+      # После выполнения тестов можно остановить контейнеры
+      - name: Shutdown containers
+        run: |
+          docker-compose down
