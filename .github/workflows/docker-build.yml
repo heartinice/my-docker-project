@@ -68,9 +68,9 @@ jobs:
       # Шаг 5: Сборка проекта с помощью CMake
       - name: Build C++ project
         run: |
-          mkdir -p build
-          cd app1/build
-          cmake ..
+          mkdir -p build  # Создаём директорию build в корне проекта
+          cd build
+          cmake ../app1   # Указываем путь к папке с исходным кодом, где находится CMakeLists.txt
           make
 
       # Шаг 6: Запуск Docker Compose для сборки и тестирования приложения
