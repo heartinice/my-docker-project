@@ -1,155 +1,161 @@
-//#include <iostream>
-//#include <sqlite3.h> // Подключаем SQLite3
-//#include <string>
-//
-//// Функция для выполнения SQL-запросов
-//void executeSQL(sqlite3* db, const std::string& sql) {
-//    char* errMsg = nullptr;
-//    if (sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &errMsg) != SQLITE_OK) {
-//        std::cerr << "SQL error: " << errMsg << std::endl;
-//        sqlite3_free(errMsg);
-//    }
-//}
-//
-//// Функция для отображения задач
-//void viewTasks(sqlite3* db) {
-//    const char* sql = "SELECT id, task FROM tasks;";
-//    sqlite3_stmt* stmt;
-//
-//    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
-//        std::cout << "\nYour tasks:\n";
-//        while (sqlite3_step(stmt) == SQLITE_ROW) {
-//            int id = sqlite3_column_int(stmt, 0);
-//            const char* task = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-//            std::cout << id << ". " << task << "\n";
-//        }
-//        sqlite3_finalize(stmt);
-//    } else {
-//        std::cerr << "Failed to fetch tasks.\n";
-//    }
-//}
-//
-//// Функция для добавления задачи
-//void addTask(sqlite3* db) {
-//    std::cout << "\nEnter a new task: ";
-//    std::string newTask;
-//    std::cin.ignore();
-//    std::getline(std::cin, newTask);
-//
-//    std::string sql = "INSERT INTO tasks (task) VALUES ('" + newTask + "');";
-//    executeSQL(db, sql);
-//    std::cout << "Task added successfully!\n";
-//}
-//
-//// Функция для удаления задачи
-//void removeTask(sqlite3* db) {
-//    std::cout << "\nEnter the ID of the task to remove: ";
-//    int taskId;
-//    std::cin >> taskId;
-//
-//    std::string sql = "DELETE FROM tasks WHERE id = " + std::to_string(taskId) + ";";
-//    executeSQL(db, sql);
-//    std::cout << "Task removed successfully!\n";
-//}
-//
-//// Главная функция
-//int main() {
-//    // Открываем базу данных
-//    sqlite3* db;
-//    if (sqlite3_open("/app1/database/base1.db", &db) != SQLITE_OK) {
-//        std::cerr << "Failed to open database\n";
-//        return 1;
-//    }
-//
-//    // Создаем таблицу, если её ещё нет
-//    const char* createTableSQL = "CREATE TABLE IF NOT EXISTS tasks ("
-//                                 "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-//                                 "task TEXT NOT NULL);";
-//    executeSQL(db, createTableSQL);
-//
-//    // Меню приложения
-//    int choice;
-//    do {
-//        std::cout << "\nTODO List Application\n";
-//        std::cout << "1. View tasks\n";
-//        std::cout << "2. Add task\n";
-//        std::cout << "3. Remove task\n";
-//        std::cout << "4. Exit\n";
-//        std::cout << "Enter your choice: ";
-//        std::cin >> choice;
-//
-//        if (choice == 1) {
-//            viewTasks(db);
-//        } else if (choice == 2) {
-//            addTask(db);
-//        } else if (choice == 3) {
-//            removeTask(db);
-//        }
-//    } while (choice != 4);
-//
-//    // Закрываем базу данных
-//    sqlite3_close(db);
-//    std::cout << "Goodbye!\n";
-//    return 0;
-//}
 #include <iostream>
-#include <sqlite3.h> // Подключаем SQLite3
+#include <vector>
+#include <fstream>
+#include <sstream>
 #include <string>
+#include <algorithm>
+#include <unistd.h> // Для getcwd
+#include <limits.h> // Для PATH_MAX
 
-// Функция для выполнения SQL-запросов
-void executeSQL(sqlite3* db, const std::string& sql) {
-    char* errMsg = nullptr;
-    if (sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &errMsg) != SQLITE_OK) {
-        std::cerr << "SQL error: " << errMsg << std::endl;
-        sqlite3_free(errMsg);
+class Task {
+public:
+    int id;
+    std::string task;
+
+    // Конструктор для Task
+    Task(int id, const std::string& task) {
+        this->id = id;
+        this->task = task;
     }
-}
+};
 
-// Функция для отображения задач
-void viewTasks(sqlite3* db) {
-    const char* sql = "SELECT id, task FROM tasks;";
-    sqlite3_stmt* stmt;
+class TodoApp {
+public:
+    TodoApp(const std::string& dbFile) {
+        this->dbFile = dbFile;
+        this->nextId = 1;
+        loadTasks();  // Загружаем задачи из файла при старте
+    }
 
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
-        std::cout << "\nYour tasks:\n";
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            int id = sqlite3_column_int(stmt, 0);
-            const char* task = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-            std::cout << id << ". " << task << "\n";
+    ~TodoApp() {
+        saveTasks();  // Сохраняем задачи в файл при завершении
+    }
+
+    // Метод для добавления задачи
+    void addTask(const std::string& task) {
+        tasks.push_back(Task(nextId++, task));  // Создание объекта Task
+        std::cout << "Задача добавлена: " << task << std::endl;
+        saveTasks();  // Сохраняем изменения в файл сразу после добавления
+    }
+
+    // Метод для удаления задачи
+    void removeTask(int taskId) {
+        bool found = false;
+        for (std::vector<Task>::iterator it = tasks.begin(); it != tasks.end(); ++it) {
+            if (it->id == taskId) {
+                tasks.erase(it);
+                std::cout << "Задача с ID " << taskId << " удалена.\n";
+                found = true;
+                break;
+            }
         }
-        sqlite3_finalize(stmt);
-    } else {
-        std::cerr << "Failed to fetch tasks.\n";
+        if (!found) {
+            std::cout << "Задача с таким ID не найдена.\n";
+        }
+        saveTasks();  // Сохраняем изменения в файл сразу после удаления
     }
-}
 
-// Функция для добавления задачи
-void addTask(sqlite3* db) {
-    std::string sql = "INSERT INTO tasks (task) VALUES ('Automatic Task');";
-    executeSQL(db, sql);
-    std::cout << "Task added automatically!\n";
-}
+    // Метод для просмотра всех задач
+    void viewTasks() const {
+        if (tasks.empty()) {
+            std::cout << "Задачи отсутствуют.\n";
+            return;
+        }
 
-// Главная функция
+        std::cout << "\nСписок ваших задач:\n";
+        for (size_t i = 0; i < tasks.size(); ++i) {
+            std::cout << tasks[i].id << ". " << tasks[i].task << "\n";
+        }
+    }
+
+private:
+    std::vector<Task> tasks; // Список задач
+    int nextId;  // Следующий идентификатор для задачи
+    std::string dbFile;  // Путь к файлу базы данных
+
+    // Загрузка задач из файла
+    void loadTasks() {
+        std::ifstream file(dbFile);
+        std::string line;
+        if (!file.is_open()) {
+            std::cerr << "Ошибка: не удалось открыть файл " << dbFile << std::endl;
+            return;
+        }
+
+        while (std::getline(file, line)) {
+            std::stringstream ss(line);
+            int id;
+            std::string task;
+            ss >> id;                  // Считываем ID
+            std::getline(ss, task);    // Считываем текст задачи
+            if (!task.empty() && task[0] == ',') {
+                task = task.substr(1); // Убираем лишний пробел
+            }
+            tasks.push_back(Task(id, task));
+            nextId = (id >= nextId) ? (id + 1) : nextId; // Обновляем nextId
+        }
+    }
+
+    // Сохранение задач в файл
+    void saveTasks() const {
+        std::ofstream file(dbFile, std::ofstream::trunc); // Открываем файл для перезаписи
+        if (!file) {
+            std::cerr << "Ошибка: не удалось открыть файл для записи\n";
+            return;
+        }
+
+        for (size_t i = 0; i < tasks.size(); ++i) {
+            file << tasks[i].id << ", " << tasks[i].task << "\n";
+        }
+    }
+};
+
 int main() {
-    // Открываем базу данных
-    sqlite3* db;
-    if (sqlite3_open("../database/base1.db", &db) != SQLITE_OK) {
-        std::cerr << "Failed to open database\n";
-        return 1;
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) != nullptr) {
+        std::cout << "Текущая рабочая директория: " << cwd << std::endl;
+    } else {
+        perror("Ошибка getcwd");
     }
 
-    // Создаем таблицу, если её ещё нет
-    const char* createTableSQL = "CREATE TABLE IF NOT EXISTS tasks ("
-                                 "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                                 "task TEXT NOT NULL);";
-    executeSQL(db, createTableSQL);
+    TodoApp app("../database/base.txt"); // Путь к файлу базы данных
 
-    // Автоматическое добавление задачи
-    addTask(db);
+    int choice;
+    std::string newTask;
+    int taskId;
 
-    // Закрываем базу данных
-    sqlite3_close(db);
-    std::cout << "Goodbye!\n";
-    return 0;
+    do {
+        std::cout << "\nМеню:\n";
+        std::cout << "1. Просмотреть задачи\n";
+        std::cout << "2. Добавить задачу\n";
+        std::cout << "3. Удалить задачу\n";
+        std::cout << "4. Выйти\n";
+        std::cout << "Выберите опцию: ";
+        std::cin >> choice;
+
+        switch (choice) {
+            case 1:
+                app.viewTasks();
+                break;
+            case 2:
+                std::cout << "Введите описание задачи: ";
+                std::cin.ignore(); // Очищаем буфер ввода
+                std::getline(std::cin, newTask);
+                app.addTask(newTask);
+                break;
+            case 3:
+                std::cout << "Введите ID задачи для удаления: ";
+                std::cin >> taskId;
+                app.removeTask(taskId);
+                break;
+            case 4:
+                std::cout << "До свидания!\n";
+                break;
+            default:
+                std::cout << "Неверный выбор. Попробуйте снова.\n";
+                break;
+        }
+    } while (choice != 4); // Закрываем do-while цикл, если выбор != 4
+
+    return 0; // Завершаем программу
 }

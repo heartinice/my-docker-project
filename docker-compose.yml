@@ -1,17 +1,11 @@
-
+version: '3.8'
 
 services:
-  app1:
-    build:
-      context: ./app1  # Указываем директорию с Dockerfile для app1
-    container_name: app1_container
+  todoapp:
+    build: .
+    volumes:
+      - ./database:/app/database
     ports:
       - "8080:8080"
-    volumes:
-      - ./database:/app1/database  # Монтируем базу данных в контейнер
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
+    environment:
+      - DB_FILE=/app/database/base.txt

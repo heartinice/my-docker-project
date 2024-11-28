@@ -1,23 +1,15 @@
-# Используем базовый образ с поддержкой C++ (например, gcc)
+ Используем официальный образ для C++
 FROM gcc:latest
 
-# Обновление пакетов и установка необходимых зависимостей
-RUN apt-get update && apt-get install -y \
-    cmake \
-    sqlite3 \
-    libsqlite3-dev
+# Устанавливаем CMake
+RUN apt-get update && apt-get install -y cmake
 
-
-# Устанавливаем рабочую директорию внутри контейнера
+# Копируем проект в контейнер
 WORKDIR /app
+COPY . /app
 
-# Копируем исходный код в контейнер
-COPY main.cpp .
+# Создаем проект с помощью cmake
+RUN cmake . && make
 
-# Компилируем приложение
-RUN g++ -o app main.cpp -lsqlite3
-
-# Указываем команду для запуска приложения
-CMD ["./app"]
-
-
+# Запускаем приложение
+CMD ["./app1"]
