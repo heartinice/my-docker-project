@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -18,10 +19,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Build Docker image
+      - name: Set up Docker Compose
         run: |
-          docker build -t todoapp .
+          sudo apt-get install docker-compose
 
-      - name: Run TodoApp
+      - name: Build Docker images
         run: |
-          docker run --rm todoapp
+          docker-compose build
+
+      - name: Run Docker Compose
+        run: |
+          docker-compose up --abort-on-container-exit --exit-code-from todoapp
