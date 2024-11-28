@@ -8,7 +8,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./app1/base1.db:/app/base1.db  # Монтируем базу данных в контейнер
+      - ./database/base1.db:/app/base1.db  # Монтируем базу данных в контейнер
     networks:
       - app-network
 
