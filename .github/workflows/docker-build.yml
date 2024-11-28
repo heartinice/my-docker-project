@@ -30,3 +30,7 @@ jobs:
       - name: Run Docker Compose
         run: |
           docker-compose up --abort-on-container-exit --exit-code-from todoapp
+
+      - name: Check logs
+        run: |
+          docker-compose logs todoapp
