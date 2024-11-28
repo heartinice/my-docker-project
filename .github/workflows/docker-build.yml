@@ -101,13 +101,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Шаг 3: Установка Docker Compose (фиксированная версия)
       - name: Install Docker Compose
         run: |
           DOCKER_COMPOSE_VERSION=2.20.2
-          sudo curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo curl -L "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose --version
+
 
       # Шаг 4: Кеширование зависимостей
       - name: Cache C++ build
