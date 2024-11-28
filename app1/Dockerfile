@@ -15,7 +15,7 @@ WORKDIR /app
 COPY main.cpp .
 
 # Компилируем приложение
-RUN g++ -o app main.cpp-lsqlite3
+RUN g++ -o app main.cpp -lsqlite3
 
 # Указываем команду для запуска приложения
 CMD ["./app"]
