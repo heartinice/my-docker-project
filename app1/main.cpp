@@ -56,7 +56,7 @@ void removeTask(sqlite3* db) {
 int main() {
     // Открываем базу данных
     sqlite3* db;
-    if (sqlite3_open("../database/base1.db", &db) != SQLITE_OK) {
+    if (sqlite3_open("/app1/database/base1.db", &db) != SQLITE_OK) {
         std::cerr << "Failed to open database\n";
         return 1;
     }
