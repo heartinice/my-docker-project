@@ -1,36 +1,17 @@
-
+version: '3.8'
 
 services:
   app1:
     build:
       context: ./app1  # Указываем директорию с Dockerfile для app1
     container_name: app1_container
-    depends_on:
-      - database  # Сначала запустится база данных
     ports:
-      - "8080:8080"  # Проброс порта для вашего приложения
-    networks:
-      - app-network
-
-  database:
-    build:
-      context: ./database  # Указываем директорию с Dockerfile для базы данных
-    container_name: database_container
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: example_db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: userpassword
-    ports:
-      - "3306:3306"  # Проброс порта для базы данных
+      - "8080:8080"
     volumes:
-      - db_data:/var/lib/mysql  # Для сохранения данных
-      - ./database/base1.sql:/docker-entrypoint-initdb.d/base1.sql  # Инициализация базы
+      - ./app1/base1.db:/app/base1.db  # Монтируем базу данных в контейнер
     networks:
       - app-network
-
-volumes:
-  db_data:  # Определяем том для хранения данных MySQL
 
 networks:
-  app-network:  # Определяем общую сеть для сервисов
+  app-network:
+    driver: bridge
