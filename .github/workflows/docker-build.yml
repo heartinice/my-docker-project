@@ -138,7 +138,7 @@ jobs:
 
       # Шаг 8: Запуск тестов через Docker Compose
       - name: Run tests
-        run: docker-compose up --exit-code-from app --abort-on-container-exit
+        run: docker-compose up --exit-code-from app1 --abort-on-container-exit
 
       # Шаг 9: Очистка Docker-кэша
       - name: Clean Docker cache
