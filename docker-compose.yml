@@ -1,12 +1,10 @@
-
-
 services:
   todoapp:
     build: .
     volumes:
-      - ./database:/app1/database
+      - ./database:/app/database  # Монтируем папку database на хосте в контейнер
     ports:
       - "8080:8080"
     environment:
-      - DB_FILE=/app1/database/base.txt  # Указываем путь к файлу внутри контейнера
-    command: ["./todoapp"]  # Запуск вашего приложения
+      - DB_FILE=/app/database/base.txt  # Указание на путь файла внутри контейнера
+    command: ["./todoapp"]  # Запуск приложения

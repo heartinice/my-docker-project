@@ -12,4 +12,4 @@ COPY . /app
 RUN cmake . && make
 
 # Запускаем приложение
-CMD ["./app1"]
+CMD ["./todoapp"]
