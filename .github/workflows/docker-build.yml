@@ -69,7 +69,7 @@ jobs:
       - name: Build C++ project
         run: |
           mkdir -p build
-          cd build
+          cd app1/build
           cmake ..
           make
 
